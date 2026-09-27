@@ -77,4 +77,4 @@ Manual release pass: use two separate browser profiles/devices; create/join via 
 
 ## Assets and limits
 
-No image, audio, or game asset files are used. Visuals are original canvas/CSS shapes. Music, engine, and boost sounds are generated live with the Web Audio API. Google Fonts (`DM Sans`, `Racing Sans One`) use the SIL Open Font License. Current scope has one polished track, two racers, in-memory rooms, and no spectator mode or persistent leaderboard. Server restarts end active races.
+No image, audio, or game asset files are used. Visuals are original canvas/CSS shapes. An original looping synthwave song, engine, drums, and boost sounds are generated live with the Web Audio API. Google Fonts (`DM Sans`, `Racing Sans One`) use the SIL Open Font License. Current scope has one polished track, two racers, in-memory rooms, and no spectator mode or persistent leaderboard. Server restarts end active races.
