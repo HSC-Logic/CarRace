@@ -41,10 +41,10 @@ Create the local environment file. It is ignored by Git:
 
 ```bash
 cp .env.example .env
-# Edit .env and set CLOUDFLARE_TUNNEL_TOKEN to the rotated tunnel token.
+# Edit .env and set CLOUDFLARE_TUNNEL_TOKEN and POSTGRES_PASSWORD.
 ```
 
-In Cloudflare Zero Trust, configure the tunnel's public hostname, for example `race.example.com`, with service type **HTTP** and URL `race-server:2567`. Then start both containers:
+In Cloudflare Zero Trust, configure the tunnel's public hostname, for example `race.example.com`, with service type **HTTP** and URL `race-server:2567`. Then start the server, PostgreSQL, and tunnel:
 
 ```bash
 docker compose up -d --build
@@ -62,6 +62,9 @@ Environment variables:
 | `VITE_BASE_PATH` | Pages workflow | `/CarRace/` | Repository subpath |
 | `PORT` | Server container | `2567` | Internal listen port |
 | `CLOUDFLARE_TUNNEL_TOKEN` | Mac's ignored `.env` | secret token | Authenticates the local tunnel; never commit it |
+| `POSTGRES_PASSWORD` | Mac's ignored `.env` | long random password | Protects the internal PostgreSQL user; never commit it |
+
+PostgreSQL is reachable only inside Docker. Race finishes populate the online leaderboard and persist in the `postgres_data` Docker volume. Back up that volume before moving machines. Never run `docker compose down -v` unless deleting all leaderboard data is intended.
 
 ## Verification
 
@@ -77,4 +80,4 @@ Manual release pass: use two separate browser profiles/devices; create/join via 
 
 ## Assets and limits
 
-No image, audio, or game asset files are used. Visuals are original canvas/CSS shapes. An original looping synthwave song, engine, drums, and boost sounds are generated live with the Web Audio API. Google Fonts (`DM Sans`, `Racing Sans One`) use the SIL Open Font License. Current scope has one polished track, two racers, in-memory rooms, and no spectator mode or persistent leaderboard. Server restarts end active races.
+No image, audio, or game asset files are used. Visuals are original canvas/CSS shapes. An original looping synthwave song, engine, drums, and boost sounds are generated live with the Web Audio API. Google Fonts (`DM Sans`, `Racing Sans One`) use the SIL Open Font License. Rooms remain in memory, so server restarts end active races. PostgreSQL preserves completed online race records, not active rooms.

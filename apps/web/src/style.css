@@ -6,3 +6,4 @@
 #connection{font-size:11px;color:#78c6ba}#connection.offline{color:#ff91a2}
 
 .touch.left{direction:rtl}.touch.left button{direction:ltr}
+#leaderboard{font-size:13px;color:#bad0cd}#leaderboard ol{display:grid;gap:8px;margin:0;padding-left:25px}#leaderboard li{padding-left:4px}#leaderboard li span{float:right;color:#789b96}

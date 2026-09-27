@@ -1,0 +1,5 @@
+import pg from'pg';
+const pool=process.env.DATABASE_URL?new pg.Pool({connectionString:process.env.DATABASE_URL}):null;
+export async function initDb(){if(!pool)return;await pool.query(`CREATE TABLE IF NOT EXISTS race_results(id BIGSERIAL PRIMARY KEY,track_id TEXT NOT NULL,player_name TEXT NOT NULL,finish_ms INTEGER NOT NULL,won BOOLEAN NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT now());CREATE INDEX IF NOT EXISTS race_results_track_time ON race_results(track_id,finish_ms)`)}
+export async function saveResults(trackId:string,cars:{name:string;finishedAt:number|null}[]){if(!pool)return;const winner=[...cars].sort((a,b)=>(a.finishedAt||Infinity)-(b.finishedAt||Infinity))[0];for(const car of cars)if(car.finishedAt)await pool.query('INSERT INTO race_results(track_id,player_name,finish_ms,won) VALUES($1,$2,$3,$4)',[trackId,car.name,Math.round(car.finishedAt),car===winner])}
+export async function leaderboard(){if(!pool)return[];const{rows}=await pool.query('SELECT track_id,player_name,finish_ms,created_at FROM race_results ORDER BY finish_ms ASC LIMIT 30');return rows}
