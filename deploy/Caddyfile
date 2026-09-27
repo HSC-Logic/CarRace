@@ -1,0 +1,3 @@
+{$DOMAIN} {
+  reverse_proxy race-server:2567
+}

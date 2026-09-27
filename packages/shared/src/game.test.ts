@@ -1,0 +1,3 @@
+import{describe,expect,it}from'vitest';import{crossed,emptyControls,stepCar,TRACKS,type Car}from'./index';
+const car=():Car=>({id:'1',name:'A',color:'#fff',x:200,y:515,angle:0,vx:0,vy:-20,lap:0,checkpoint:0,finishedAt:null,boost:0,ready:false,connected:true});
+describe('race rules',()=>{it('rejects backward finish crossing',()=>{const c=car();c.vy=20;expect(crossed({...c},c)).toBe(false);expect(c.lap).toBe(0)});it('accepts forward crossing',()=>{const c=car();expect(crossed({...c},c)).toBe(true);expect(c.lap).toBe(1)});it('clamps hostile controls',()=>{const c=car();stepCar(c,{...emptyControls(),throttle:999,steer:999},.016,TRACKS[0]);expect(Math.hypot(c.vx,c.vy)).toBeLessThan(300)})});
