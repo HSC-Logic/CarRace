@@ -2,3 +2,5 @@
 
 .rotate{display:none;position:fixed;inset:auto 10px 88px;z-index:4;text-align:center;color:#f3e2b7;font-size:12px}@media (orientation:landscape){.rotate{display:none!important}}
 #notice{position:fixed;inset:22% 0 auto;text-align:center;font:54px 'Racing Sans One';color:#ffd166;opacity:0;scale:.7;pointer-events:none;text-shadow:0 8px 30px #000;transition:.25s}#notice.show{opacity:1;scale:1}.modal{animation:finish-in .45s cubic-bezier(.2,.9,.2,1)}@keyframes finish-in{from{opacity:0;transform:scale(.75) rotate(-2deg)}to{opacity:1;transform:none}}
+
+#connection{font-size:11px;color:#78c6ba}#connection.offline{color:#ff91a2}
