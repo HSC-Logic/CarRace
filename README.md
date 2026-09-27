@@ -33,20 +33,18 @@ Controls: arrow keys or WASD steer/accelerate/brake, Space boosts. Phones receiv
 
 The workflow sets `VITE_BASE_PATH=/<repository>/`, ensuring assets load at `https://<owner>.github.io/<repository>/`. Only `apps/web/dist` is deployed. GitHub Pages cannot run the multiplayer server; the VPS below must remain online for online races. Solo practice remains available without it.
 
-## Mac multiplayer server
+## Mac multiplayer server with Cloudflare Tunnel
 
-The Mac can host the production server. It must remain powered on, awake, connected to the internet, and running Docker Desktop. Give the Mac a reserved LAN address in the router. Point a DNS hostname such as `race.example.com` to the home's public IP, then forward router TCP ports 80 and 443 plus UDP 443 to the Mac.
-
-If the ISP uses CGNAT, blocks inbound ports, or the public IP changes frequently, normal port forwarding will not work reliably. Request a public/static IP or use a tunnel provider; do not expose port 2567 directly.
+The Mac can host the production server through Cloudflare Tunnel. Dynamic public IPs and CGNAT are supported. No router port forwarding is required. The Mac must remain powered on, awake, connected to the internet, and running Docker Desktop.
 
 Create the local environment file. It is ignored by Git:
 
 ```bash
 cp .env.example .env
-# Edit .env: DOMAIN=race.your-domain.com
+# Edit .env and set CLOUDFLARE_TUNNEL_TOKEN to the rotated tunnel token.
 ```
 
-Start the game service and Caddy reverse proxy:
+In Cloudflare Zero Trust, configure the tunnel's public hostname, for example `race.example.com`, with service type **HTTP** and URL `race-server:2567`. Then start both containers:
 
 ```bash
 docker compose up -d --build
@@ -54,7 +52,7 @@ docker compose ps
 curl https://race.your-domain.com/health
 ```
 
-Caddy automatically obtains HTTPS certificates and proxies WebSocket upgrades, producing secure WSS. Only ports 80/443 are exposed. Both containers use `restart: unless-stopped`. For upgrades: `git pull && docker compose up -d --build`. For logs: `docker compose logs -f`. In Docker Desktop, enable **Start Docker Desktop when you sign in**. In macOS **System Settings → Lock Screen**, prevent automatic sleeping while the Mac is acting as the server.
+Cloudflare supplies HTTPS and proxies WebSocket upgrades, producing secure WSS. No inbound ports are exposed. Both containers use `restart: unless-stopped`. For upgrades: `git pull && docker compose up -d --build`. For logs: `docker compose logs -f`. In Docker Desktop, enable **Start Docker Desktop when you sign in**. In macOS **System Settings → Lock Screen**, prevent automatic sleeping while the Mac is acting as the server.
 
 Environment variables:
 
@@ -63,7 +61,7 @@ Environment variables:
 | `VITE_SERVER_URL` | GitHub repository variable / web `.env.local` | `https://race.example.com` | Public matchmaking origin; room traffic uses WSS |
 | `VITE_BASE_PATH` | Pages workflow | `/CarRace/` | Repository subpath |
 | `PORT` | Server container | `2567` | Internal listen port |
-| `DOMAIN` | Mac's ignored `.env` | `race.example.com` | Public server hostname used by Caddy |
+| `CLOUDFLARE_TUNNEL_TOKEN` | Mac's ignored `.env` | secret token | Authenticates the local tunnel; never commit it |
 
 ## Verification
 
