@@ -1,5 +1,5 @@
 export type Controls={seq:number;throttle:number;steer:number;brake:boolean;boost:boolean}
-export type Car={id:string;name:string;color:string;x:number;y:number;angle:number;vx:number;vy:number;lap:number;checkpoint:number;finishedAt:number|null;boost:number;ready:boolean;connected:boolean;model?:'sport'|'drift'|'muscle'}
+export type Car={id:string;name:string;color:string;x:number;y:number;angle:number;vx:number;vy:number;lap:number;checkpoint:number;finishedAt:number|null;boost:number;ready:boolean;connected:boolean;disconnectedAt?:number;model?:'sport'|'drift'|'muscle'}
 export type Track={id:string;name:string;theme:string;width:number;height:number;spawn:[number,number,number];walls:{x:number;y:number;w:number;h:number}[];checkpoints:{x:number;y:number;w:number;h:number;forward:'x'|'y';sign:1|-1}[];boostPads:{x:number;y:number;r:number}[];hazards:{x:number;y:number;r:number}[]}
 const border=[{x:0,y:0,w:1200,h:34},{x:0,y:686,w:1200,h:34},{x:0,y:0,w:34,h:720},{x:1166,y:0,w:34,h:720}];
 const gates=[{x:75,y:505,w:270,h:18,forward:'y' as const,sign:-1 as const},{x:75,y:80,w:270,h:30,forward:'y' as const,sign:-1 as const},{x:930,y:70,w:220,h:30,forward:'y' as const,sign:1 as const},{x:930,y:590,w:220,h:30,forward:'y' as const,sign:1 as const}];
