@@ -25,7 +25,7 @@ jobs:
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
           VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/dist
