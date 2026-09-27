@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 COPY apps/server/package.json apps/server/package.json
@@ -8,7 +8,7 @@ RUN npm ci
 COPY apps/server apps/server
 COPY packages/shared packages/shared
 RUN npm run build -w @heartline/server
-FROM node:22-alpine
+FROM node:26-alpine
 WORKDIR /app
 ENV NODE_ENV=production PORT=2567
 COPY --from=build /app/node_modules node_modules
