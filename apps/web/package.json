@@ -1,1 +1,1 @@
-{"name":"@heartline/web","private":true,"type":"module","scripts":{"dev":"vite","build":"tsc -b && vite build","typecheck":"tsc -b --pretty false","lint":"tsc -b --pretty false"},"dependencies":{"@colyseus/sdk":"^0.18.4","@heartline/shared":"*"},"devDependencies":{"vite":"^7.1.3"}}
+{"name":"@heartline/web","private":true,"type":"module","scripts":{"dev":"vite","build":"tsc -b && vite build","typecheck":"tsc -b --pretty false","lint":"tsc -b --pretty false"},"dependencies":{"@colyseus/sdk":"^0.18.4","@heartline/shared":"*"},"devDependencies":{"vite":"^8.3.1"}}
