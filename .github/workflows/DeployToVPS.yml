@@ -1,0 +1,83 @@
+name: Deploy
+
+on:
+  push:
+    branches: [release]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-release
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Verify artifact
+        run: test -s dist/index.html && test -d dist/assets && find dist/assets -type f -print -quit | grep -q .
+      - name: Configure SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          HOST_KEY: ${{ vars.VPS_SSH_HOST_KEY || secrets.VPS_SSH_HOST_KEY }}
+        run: |
+          test -n "$DEPLOY_KEY" || { echo 'VPS_DEPLOY_SSH_KEY is required'; exit 1; }
+          test -n "$HOST_KEY" || { echo 'VPS_SSH_HOST_KEY variable or secret is required'; exit 1; }
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$HOST_KEY" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+      - name: Upload immutable release
+        env:
+          HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          USER: ${{ vars.VPS_DEPLOY_USER }}
+          PORT: 10030
+          RELEASE: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          test -n "$HOST" && test -n "$USER" || { echo 'VPS_DEPLOY_HOST and VPS_DEPLOY_USER are required'; exit 1; }
+          stage="/var/www/carrace/releases/.upload-$RELEASE-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          final="/var/www/carrace/releases/$RELEASE"
+          ssh -i ~/.ssh/deploy_key -p "$PORT" "$USER@$HOST" "test ! -e '$final' && mkdir '$stage'"
+          rsync -az -e "ssh -i ~/.ssh/deploy_key -p $PORT" dist/ "$USER@$HOST:$stage/"
+          ssh -i ~/.ssh/deploy_key -p "$PORT" "$USER@$HOST" "test -s '$stage/index.html' && test -d '$stage/assets' && find '$stage/assets' -type f -print -quit | grep -q . && test ! -e '$final' && mv '$stage' '$final'"
+      - name: Activate and health-check release
+        env:
+          HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          USER: ${{ vars.VPS_DEPLOY_USER }}
+          PORT: 10030
+          RELEASE: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$PORT" "$USER@$HOST" 'bash -s' -- "$RELEASE" <<'REMOTE'
+          set -eu
+          release="$1"
+          base=/var/www/carrace
+          target="$base/releases/$release"
+          current="$base/current"
+          test -s "$target/index.html"
+          test -d "$target/assets"
+          test -n "$(find "$target/assets" -type f -print -quit)"
+          previous=$(readlink "$current" 2>/dev/null || true)
+          ln -s "$target" "$base/.current-$release"
+          mv -Tf "$base/.current-$release" "$current"
+          if ! response=$(curl --fail --silent --show-error --max-time 10 http://127.0.0.1:8086/) || [ "$response" != "$(cat "$current/index.html")" ]; then
+            if [ -n "$previous" ]; then
+              ln -s "$previous" "$base/.rollback-$release"
+              mv -Tf "$base/.rollback-$release" "$current"
+            else
+              rm -f "$current"
+            fi
+            echo 'Health check failed on port 8086; previous release restored.' >&2
+            exit 1
+          fi
+          REMOTE
