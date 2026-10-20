@@ -70,14 +70,14 @@ jobs:
           previous=$(readlink "$current" 2>/dev/null || true)
           ln -s "$target" "$base/.current-$release"
           mv -Tf "$base/.current-$release" "$current"
-          if ! response=$(curl --fail --silent --show-error --max-time 10 http://127.0.0.1:8086/) || [ "$response" != "$(cat "$current/index.html")" ]; then
+          if ! response=$(curl --fail --silent --show-error --max-time 10 http://127.0.0.1:8088/) || [ "$response" != "$(cat "$current/index.html")" ]; then
             if [ -n "$previous" ]; then
               ln -s "$previous" "$base/.rollback-$release"
               mv -Tf "$base/.rollback-$release" "$current"
             else
               rm -f "$current"
             fi
-            echo 'Health check failed on port 8086; previous release restored.' >&2
+            echo 'Health check failed on port 8088; previous release restored.' >&2
             exit 1
           fi
           REMOTE
