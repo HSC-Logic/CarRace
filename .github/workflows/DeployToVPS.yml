@@ -2,14 +2,14 @@ name: Deploy
 
 on:
   push:
-    branches: [release]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: deploy-release
+  group: deploy-main
   cancel-in-progress: false
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - name: Verify artifact
-        run: test -s dist/index.html && test -d dist/assets && find dist/assets -type f -print -quit | grep -q .
+        run: test -s apps/web/dist/index.html && test -d apps/web/dist/assets && find apps/web/dist/assets -type f -print -quit | grep -q .
       - name: Configure SSH
         env:
           DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
@@ -49,7 +49,7 @@ jobs:
           stage="/var/www/carrace/releases/.upload-$RELEASE-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           final="/var/www/carrace/releases/$RELEASE"
           ssh -i ~/.ssh/deploy_key -p "$PORT" "$USER@$HOST" "test ! -e '$final' && mkdir '$stage'"
-          rsync -az -e "ssh -i ~/.ssh/deploy_key -p $PORT" dist/ "$USER@$HOST:$stage/"
+          rsync -az -e "ssh -i ~/.ssh/deploy_key -p $PORT" apps/web/dist/ "$USER@$HOST:$stage/"
           ssh -i ~/.ssh/deploy_key -p "$PORT" "$USER@$HOST" "test -s '$stage/index.html' && test -d '$stage/assets' && find '$stage/assets' -type f -print -quit | grep -q . && test ! -e '$final' && mv '$stage' '$final'"
       - name: Activate and health-check release
         env:
